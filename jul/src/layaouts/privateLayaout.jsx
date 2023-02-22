@@ -1,4 +1,4 @@
-import React, { Children } from 'react'
+
 import Sidebar from '../components/sidebar'
 
 const PrivateLayaout = ({children}) => {

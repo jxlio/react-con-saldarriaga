@@ -1,15 +1,64 @@
 import { useEffect, useState } from "react"
 import React from 'react'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+const vehiculosBack = [
+  {
+    nombre: "corola",
+    marca: "toyota",
+    modelo: 2014,
+
+  },
+
+  {
+    nombre: "Fiesta",
+    marca: "Ford",
+    modelo: 2012,
+    
+  },
+
+  {
+    nombre: "Renault",
+    marca: "Rise",
+    modelo: 2011,
+    
+  },
+
+  {
+    nombre: "Stone",
+    marca: "toyota",
+    modelo: 2018,
+    
+  },
+  {
+    nombre: "Jul",
+    marca: "BMW",
+    modelo: 2024,
+    
+  }
+]
 
 const Vehiculos = () => {
   const[mostrarTabla, setMostrarTabla] = useState(true)
   const[textoBoton, setTextoBoton] = useState("Crear nuevo vehiculo")
+  const[vehiculos, setVehiculos] = useState([])
+  const[colorBoton, setColoBoton] = useState("indigo")
+
+  
+
+
+  useEffect(()=>{
+    setVehiculos(vehiculosBack)
+  }, [])
 
   useEffect(()=>{ 
     if(mostrarTabla){
       setTextoBoton("crear nuevo vehiculo")
+      setColoBoton("indigo")
     }else{
       setTextoBoton("ver vehiculos creados")
+      setColoBoton("green")
     }
   },[mostrarTabla])
 
@@ -19,9 +68,10 @@ const Vehiculos = () => {
     <div className="flex h-full w-full flex-col items-center p-8">
       <div className="flex flex-col">
         <h2 className="text-3xl font-extrabold text-gray-900 "> Pagina de administracion de vehiculos </h2>
-        <button onClick={()=>{ setMostrarTabla(!mostrarTabla)}} className="text-white rounded-full m-6 w-28 self-end bg-indigo-500 p-5">{textoBoton}</button>
-        {mostrarTabla ? <TablaVehiculos/>: <FormularioVehiculos/>}
-
+        <button onClick={()=>{ setMostrarTabla(!mostrarTabla)}} className={`text-white rounded-full m-6 w-28 self-end bg-${colorBoton}-500 p-5` }>{textoBoton}</button>
+        {mostrarTabla ? <TablaVehiculos listaVehiculos={vehiculos}/>: <FormularioVehiculos showTable={setMostrarTabla} addVehiculo={setVehiculos} listaVehiculos={vehiculos}/>}
+        <ToastContainer position="top-right"
+        autoClose={5000} />
       </div>
     </div>
 
@@ -30,7 +80,7 @@ const Vehiculos = () => {
   )
 }
 
-const TablaVehiculos = () => {
+const TablaVehiculos = ({listaVehiculos}) => {
   return(
     <div className="flex flex-col items-center justify-center">
       <h2 className="text-2xl font-extrabold text-gray-800">Todos los vehiculos</h2>
@@ -43,38 +93,78 @@ const TablaVehiculos = () => {
         </tr>
       </thead>
       <tbody>
+        {listaVehiculos.map((vehiculo)=>{
+          return(
         <tr>
-          <td>Toyota</td>
-          <td>Sander</td>
-          <td>2022</td>
+          <td>{vehiculo.nombre}</td>
+          <td>{vehiculo.marca}</td>
+          <td>{vehiculo.modelo}</td>
         </tr>
-        <tr>
-          <td>Renault</td>
-          <td>Sandero</td>
-          <td>2020</td>
-        </tr>
-        <tr>
-          <td>Renault</td>
-          <td>Sandero</td>
-          <td>2020</td>
-        </tr>
+          )
+        })}
       </tbody>
     </table>
     </div>
   )
 }
 
-const FormularioVehiculos = () =>{
+const FormularioVehiculos = ({showTable, listaVehiculos, addVehiculo}) =>{
+
+    const[name, setName] = useState("")
+    const[brand, setBrand] = useState("")
+    const[model, setModel] = useState("")
+
+    const enviarBack = ()=>{
+      console.log("Nombre: ", name, "Marca: ", brand, "Modelo: ", model)
+      toast.success("Hecho!")
+      showTable(true)
+      addVehiculo([...listaVehiculos,{
+        nombre: name,
+        marca: brand,
+        modelo: model
+      }])
+    }
+
   return(
     <div className="flex flex-col items-center justify-center">
       <h2 className="text-2xl font-extrabold text-gray-800">Crear nuevo vehiculo</h2>
-      <form className="grid grid-cols-2">        
-        <input className="bg-gray-50 border border-gray-100 p-2 rounded-lg m-2" type="text" />
-        <input className="bg-gray-50 border border-gray-100 p-2 rounded-lg m-2" type="text" type="text" />
-        <input className="bg-gray-50 border border-gray-100 p-2 rounded-lg m-2" type="text" type="text" />
-        <input className="bg-gray-50 border border-gray-100 p-2 rounded-lg m-2" type="text" type="text" />
-        <button className="col-span-2 bg-green-500 p-2 rounded-full shadow-md hover:bg-green-700">Guardar vehiculo</button>
+      <form className="flex flex-col">        
+
+      <label className="flex flex-col" htmlFor="nombre"> Nombre del vehiculo
+       <input
+        value={name}
+        onChange={(e)=>{
+        setName(e.target.value)
+       }} 
+       name="nombre" className="bg-gray-50 border border-gray-100 p-2 rounded-lg m-2" type="text" />
+      </label>
+       
+       <label className="flex flex-col" htmlFor="marca"> Marca del vehiculo
+        <select value={brand} onChange={(e)=>{
+          setBrand(e.target.value)
+        }} className="bg-gray-50 border border-gray-100 p-2 rounded-lg m-2" type="text"  name="marca" id="">
+          <option >Renault</option>
+          <option >Toyota</option>
+          <option >Ford</option>
+          <option >Mazda</option>
+          <option >Chevrolet</option>
+        </select>
+       </label>
+
+       <label className="flex flex-col"  htmlFor="modelo">Modelo del vehiculo
+       <input value={model} onChange={(e)=>{
+        setModel(e.target.value)
+       }} type="number" min={1992} max={2023} name="modelo"  className="bg-gray-50 border border-gray-100 p-2 rounded-lg m-2"  />
+       </label>
+
+       
+        
+        
+       
+        <button type="button" onClick={enviarBack} className="col-span-2 bg-green-500 p-2 rounded-full shadow-md hover:bg-green-700">Guardar vehiculo</button>
       </form>
+
+
     </div>
   )
 }
